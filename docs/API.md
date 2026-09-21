@@ -77,6 +77,11 @@ associe l'UID à l'utilisateur ciblé au lieu de vérifier un accès.
 ### `GET /api/ressources`
 Liste des salles et médicaments auxquels on peut demander l'accès.
 
+### `GET /api/utilisateurs`
+Liste de l'équipage (`id`, `nom`, `role`). Il n'y a pas d'authentification
+cette semaine : le front fait choisir qui on est. **Limite assumée, à citer
+devant le jury.**
+
 ### `POST /api/demandes`
 ```json
 { "utilisateur_id": 3, "ressource_id": 2, "motif": "Migraine persistante" }
@@ -100,19 +105,44 @@ Les demandes à traiter.
 `statut` ∈ `acceptee` | `refusee`. `valide_jusqu_a` optionnel : sans date,
 l'accès est permanent jusqu'à révocation.
 
+Les dates sont acceptées en ISO 8601 UTC (`2026-09-25T18:00:00Z`) et
+normalisées par le serveur. **Envoyez toujours de l'UTC**, pas l'heure locale :
+le serveur compare en UTC.
+
 ### `GET /api/admin/journal?limite=100`
 Le journal des passages : qui, quelle borne, quelle ressource, résultat, date.
 **C'est la donnée qui alimente l'analyse SST** (consommations, anomalies,
 pics horaires).
 
+### `GET /api/admin/statistiques`
+Les indicateurs du tableau de bord, en un seul appel :
+
+```json
+{
+  "totaux":        { "passages": 42, "autorises": 31, "refus": 11 },
+  "par_ressource": [ { "ressource": "Pharmacie de bord", "passages": 20, "autorises": 14 } ],
+  "par_heure":     [ { "heure": "09", "passages": 5 } ],
+  "refus_repetes": [ { "qui": "Léa Fontaine", "refus": 4 } ]
+}
+```
+
+`refus_repetes` liste les personnes à 3 refus ou plus. C'est le signal
+santé-sécurité du projet : quelqu'un qui bute plusieurs fois sur la pharmacie a
+un besoin non traité, ou un comportement à regarder.
+
 ### `GET /api/admin/utilisateurs` · `POST /api/admin/utilisateurs`
-Gestion de l'équipage.
+Gestion de l'équipage. Le POST attend `{ "nom", "role" }`, `role` parmi
+`astronaute` | `medecin` | `commandant`.
 
 ### `POST /api/admin/enrolement`
 ```json
 { "utilisateur_id": 3 }
 ```
 Arme le mode enrôlement pour le prochain badge lu. Expire au bout de 60 s.
+
+### `GET /api/admin/bornes`
+État des bornes, avec `vue_le` : la date du dernier contact. Permet d'afficher
+une borne hors ligne sur le portail.
 
 ### `PATCH /api/admin/bornes/:id`
 ```json

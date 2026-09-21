@@ -66,12 +66,16 @@ Content-Type: application/json
 borne/       Firmware ESP8266 (Arduino) — lecture badge, appel API, LED/buzzer
 serveur/     API REST Node.js + SQLite — autorisations, demandes, journal
 web/         Front — espace utilisateur + portail admin
-docs/        Câblage, API, journal de bord, dossier technique
+docs/        Câblage, API, déploiement, journal de bord
 ```
 
 ## Démarrage rapide
 
-### Serveur
+Le serveur tourne sur le **VPS** : la borne n'a donc pas besoin d'être sur le
+même réseau, un partage de connexion téléphone suffit le jour de la démo.
+Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md).
+
+### Serveur, en local pour développer
 
 ```bash
 cd serveur
@@ -126,5 +130,7 @@ Brochage détaillé : [`docs/CABLAGE.md`](docs/CABLAGE.md)
   HTTP. Évolution : HTTPS + clé par borne, rotation.
 - **Dépendance au serveur** — si le serveur tombe, plus aucun accès.
   Évolution : cache local des badges autorisés sur l'ESP.
+- **Routes admin non protégées** — sur un VPS public, l'API admin est ouverte.
+  Voir `docs/DEPLOIEMENT.md`. Évolution : comptes nommés et sessions.
 - **Mode urgence** — à implémenter : si l'admin ne répond pas et qu'il y a
   urgence vitale, déverrouillage tracé avec alerte.
