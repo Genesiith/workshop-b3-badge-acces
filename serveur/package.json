@@ -1,0 +1,20 @@
+{
+  "name": "borne-acces-serveur",
+  "version": "0.1.0",
+  "description": "API de contrôle d'accès par badge NFC — Workshop B3 EPSI",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "init-db": "node --env-file-if-exists=.env src/init-db.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.5.0",
+    "express": "^4.19.2"
+  },
+  "license": "MIT"
+}

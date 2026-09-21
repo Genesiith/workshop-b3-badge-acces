@@ -1,0 +1,28 @@
+# Dépendances
+node_modules/
+package-lock.json
+
+# Secrets et configuration locale
+.env
+borne/config.h
+*.local
+
+# Base de données
+*.db
+*.sqlite
+*.sqlite3
+
+# Build Arduino
+build/
+*.bin
+*.elf
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
