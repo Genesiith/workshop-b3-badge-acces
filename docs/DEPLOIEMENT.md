@@ -1,95 +1,94 @@
-# Déploiement sur le VPS
+# Déploiement sur le VPS (Pterodactyl)
 
-Le VPS change une chose importante : **la borne n'a plus besoin d'être sur le
-même réseau que le serveur.** Elle tape l'IP publique, donc un partage de
-connexion téléphone suffit le jour de la démo. C'était le plus gros risque de
-la semaine, il disparaît.
+Pterodactyl est un **panel web** : pas besoin de SSH, tout se fait depuis le
+navigateur. Le panel peut cloner directement le dépôt GitHub.
 
-## 1. Installer Node
+Ce que ça change pour le projet : la borne n'a plus besoin d'être sur le même
+WiFi que le serveur. Elle tape l'adresse publique du panel, donc **un partage
+de connexion téléphone suffit le jour de la démo**. C'était le plus gros risque
+de la semaine.
 
-```bash
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt install -y nodejs git
-node --version      # doit afficher v22 ou plus
+## 1. Créer le serveur dans le panel
+
+Choisir l'egg **Node.js (generic)**. Il sait cloner un dépôt Git tout seul.
+
+## 2. Remplir les variables de démarrage (onglet Startup)
+
+| Variable | Valeur |
+|---|---|
+| `GIT_ADDRESS` | `https://github.com/Genesiith/workshop-b3-badge-acces` |
+| `BRANCH` | `main` |
+| `MAIN_FILE` | `serveur/src/index.js` |
+| `AUTO_UPDATE` | `1` — le panel fait `git pull` à chaque redémarrage |
+| `USER_UPLOAD` | `0` |
+
+Avec `AUTO_UPDATE` à `1`, déployer une nouvelle version revient à faire
+`git push` puis **Restart** dans le panel. C'est tout.
+
+## 3. Le port
+
+**Ne pas mettre le port en dur.** Pterodactyl attribue une allocation
+(adresse + port) et la transmet au programme dans la variable `SERVER_PORT`.
+Le code la lit déjà :
+
+```js
+const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
 ```
 
-## 2. Récupérer le projet
+L'adresse publique à utiliser est celle affichée dans l'onglet **Network** du
+panel, au format `IP:PORT`.
 
-```bash
-git clone https://github.com/Genesiith/workshop-b3-badge-acces.git
-cd workshop-b3-badge-acces/serveur
-npm install
-cp .env.example .env
-nano .env           # changer CLE_BORNE, c'est le mot de passe de la borne
-npm run init-db
-```
+## 4. La clé de la borne
 
-## 3. Le faire tourner en continu
-
-```bash
-sudo npm install -g pm2
-pm2 start src/index.js --name borne-acces
-pm2 save
-pm2 startup         # suivre la commande affichée, pour le redémarrage auto
-```
-
-Voir les logs en direct : `pm2 logs borne-acces`
-
-## 4. Ouvrir le port
-
-```bash
-sudo ufw allow 3000/tcp
-```
-
-Vérifier depuis ton PC : `http://IP-DU-VPS:3000/api/ressources` doit renvoyer
-du JSON.
-
-## 5. Configurer la borne
-
-Dans `borne/config.h` :
+Ajouter une variable d'environnement `CLE_BORNE` dans le panel, avec une valeur
+que vous choisissez. La **même** doit être dans `borne/config.h` :
 
 ```c
-#define SERVEUR_URL "http://IP-DU-VPS:3000/api/badge"
-#define CLE_BORNE   "la-meme-cle-que-dans-.env"
+#define SERVEUR_URL "http://IP-DU-PANEL:PORT/api/badge"
+#define CLE_BORNE   "la-meme-valeur-que-dans-le-panel"
 ```
 
-### Attention au HTTPS
+## 5. Créer la base, une seule fois
 
-Si vous mettez un nom de domaine et un certificat, **l'ESP8266 ne suivra pas**
-sans travail supplémentaire : il faut soit `client.setInsecure()`, ce qui
-supprime la vérification du certificat, soit embarquer l'empreinte du
-certificat, qui change à chaque renouvellement.
+Dans la **Console** du panel, serveur arrêté :
 
-Le plus simple cette semaine : le **site en HTTPS**, et l'**API borne en HTTP
-sur le port 3000**. À citer comme limite connue, avec la piste d'évolution.
+```
+npm --prefix serveur run init-db
+```
+
+Ne le relancez pas ensuite : ça efface toutes les données.
+
+## 6. Vérifier
+
+Ouvrir `http://IP-DU-PANEL:PORT/api/ressources` dans un navigateur. Vous devez
+voir du JSON avec les salles et médicaments. Si oui, le serveur est joignable
+depuis Internet, et la borne pourra l'atteindre.
 
 ---
 
-## Mise à jour après un push
+## Si `npm install` échoue sur better-sqlite3
 
-```bash
-cd ~/workshop-b3-badge-acces
-git pull
-cd serveur && npm install
-pm2 restart borne-acces
-```
+`better-sqlite3` est un module natif : il se compile à l'installation, et
+l'image Node de Pterodactyl n'a pas toujours les outils de compilation.
 
-`data.db` est dans le `.gitignore` : un `git pull` n'écrase jamais vos données.
+Si vous voyez une erreur mentionnant `node-gyp`, `python` ou `make` :
+dites-le moi, on remplacera la base par une solution sans compilation. Ce n'est
+pas bloquant, mais mieux vaut le découvrir aujourd'hui que mercredi.
 
 ---
 
 ## Limite de sécurité à connaître — important
 
-**Les routes `/api/admin/*` ne sont pas protégées.** Sur un VPS public, ça veut
-dire que n'importe qui connaissant l'URL peut valider une demande, lire le
-journal ou créer un utilisateur.
+**Les routes `/api/admin/*` ne sont pas protégées.** Une fois en ligne,
+n'importe qui connaissant l'adresse peut valider une demande, lire le journal
+ou créer un utilisateur.
 
 C'est acceptable pour une maquette de workshop, mais **il faut le dire avant
 que le jury ne le demande** : sur l'axe 4 (pérennité, résilience), savoir
 nommer sa propre faille vaut mieux que se la faire trouver.
 
-Mitigation en 10 minutes si vous avez le temps mercredi : un en-tête
-`X-Admin-Token` comparé à une valeur du `.env`, vérifié par un middleware sur
+Mitigation rapide si vous avez le temps mercredi : un en-tête `X-Admin-Token`
+comparé à une variable d'environnement, vérifié par un middleware sur
 `/api/admin`. Ce n'est pas de l'authentification sérieuse, mais ça ferme la
 porte ouverte.
 

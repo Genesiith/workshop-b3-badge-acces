@@ -71,8 +71,9 @@ docs/        Câblage, API, déploiement, journal de bord
 
 ## Démarrage rapide
 
-Le serveur tourne sur le **VPS** : la borne n'a donc pas besoin d'être sur le
-même réseau, un partage de connexion téléphone suffit le jour de la démo.
+Le serveur tourne sur le **VPS, via le panel Pterodactyl** : la borne n'a donc
+pas besoin d'être sur le même réseau, un partage de connexion téléphone suffit
+le jour de la démo.
 Voir [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md).
 
 ### Serveur, en local pour développer

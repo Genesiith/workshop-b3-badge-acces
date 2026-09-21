@@ -5,7 +5,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static('../web'));
 
-const PORT = process.env.PORT || 3000;
+// Pterodactyl impose le port via SERVER_PORT. On le lit en premier,
+// sinon PORT (developpement local), sinon 3000.
+const PORT = process.env.SERVER_PORT || process.env.PORT || 3000;
 const CLE_BORNE = process.env.CLE_BORNE || 'changez-moi-avant-la-demo';
 
 // Petit utilitaire : renvoie une erreur au format convenu dans docs/API.md
