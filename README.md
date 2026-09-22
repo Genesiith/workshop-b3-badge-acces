@@ -27,7 +27,7 @@ dangereuse.
 ```
   ┌──────────────┐    HTTP/WiFi    ┌──────────────┐
   │    BORNE     │ ──────────────► │   SERVEUR    │
-  │ ESP8266      │                 │ Node + SQLite│
+  │ ESP8266      │                 │   MariaDB    │
   │ + PN532      │ ◄────────────── │              │
   │ + LED/buzzer │   autorise:     └──────┬───────┘
   └──────────────┘   true / false         │ API REST
