@@ -63,9 +63,7 @@ Content-Type: application/json
 ## Arborescence
 
 ```
-borne/       Firmware ESP8266 (Arduino) — lecture badge, appel API, LED/buzzer
 serveur/     API REST Node.js + SQLite — autorisations, demandes, journal
-web/         Front — espace utilisateur + portail admin
 docs/        Câblage, API, déploiement, journal de bord
 ```
 
