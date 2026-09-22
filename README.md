@@ -9,8 +9,7 @@ passage de badge est tracé.
 
 ## Le problème
 
-Sur une mission longue, l'accès à la pharmacie de bord et aux zones à risque
-(labo, zone de radiation) n'est ni contrôlé ni tracé. On ne sait pas qui a pris
+Sur une mission longue, l'accès à la pharmacie de bord et aux zones à risque n'est ni contrôlé ni tracé. On ne sait pas qui a pris
 quel médicament, ni quand. Pas de contrôle d'aptitude avant l'entrée en zone
 dangereuse.
 
